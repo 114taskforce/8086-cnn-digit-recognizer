@@ -5,13 +5,13 @@ DOSBox/
 __pycache__/
 *.pyc
 
-# 训练缓存与报告（train_mnist_cnn.py 可重新生成）
+# 训练产物（train_mnist_cnn.py 可重新生成）
 train/out/
+train/model output/
+
+# MASM 权重文本（训练时由 net_weights.bin 展开）
+NN_WDAT.INC
 
 # MNIST 原始数据
 *.gz
 train/data/
-
-# 二进制权重（不入库，训练重新生成；MASM 构建用其转换出的 NN_WDAT.INC）
-net_weights.bin
-NN_WDAT.INC

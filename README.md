@@ -32,7 +32,7 @@ asm\                   汇编源码
   NN_ARCHITECTURE.md   汇编实现细节（定点方案、寄存器分配、逐层说明）
 tool\                  手绘工具
   draw.bat / draw_digits.py   28×28 手绘板，内嵌位级预测实时预览
-  input model\         权重备份（nn_cfg.inc 入库；net_weights.bin 不入库）
+  input model\         权重备份与示例：nn_cfg.inc + net_weights.bin（手绘工具直接读取）
   handmade\            (使用时生成) h<数字>_<时分>.txt 手绘样本
   README.md            工具使用说明
 DOSBox\                本地 DOS 环境（不入库）：DOSBox 0.74-3、MASM/LINK/DEBUG、28×28 样例
