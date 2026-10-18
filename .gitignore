@@ -1,0 +1,17 @@
+# DOS 环境 / 工具链（DOSBox、MASM/LINK 等版权二进制，不入库）
+DOSBox/
+
+# Python
+__pycache__/
+*.pyc
+
+# 训练缓存与报告（train_mnist_cnn.py 可重新生成）
+train/out/
+
+# MNIST 原始数据
+*.gz
+train/data/
+
+# 二进制权重（不入库，训练重新生成；MASM 构建用其转换出的 NN_WDAT.INC）
+net_weights.bin
+NN_WDAT.INC
