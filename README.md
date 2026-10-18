@@ -53,6 +53,7 @@ python train\train_mnist_cnn.py
 生成：
 
 - `model output\net_weights.bin` — 5174 字节量化权重（C1 162B + C3 2432B + F5 2580B）
+- `asm\NN_WDAT.INC` — 同一权重的 DB 文本形式，供 MASM 的 `INCLUDE` 使用（不入库）
 - `model output\nn_cfg.inc` — SH1/SH3/SH4 移位常数
 - `test demo\DEMO0.TXT`、`test demo\DEMO9.TXT` — 演示样本
 - `out\report_cnn.txt` — 精度报告
@@ -62,28 +63,9 @@ python train\train_mnist_cnn.py
 - 首次运行需联网下载 MNIST。
 - 模型缓存于 `train\out\cnn_model.npz`，重训前删除该文件。
 
-### 第 2 步：生成权重数据文件并用 MASM 编译
+### 第 2 步：复制源码并用 MASM 编译
 
-把 `asm\NN.ASM` 和 `train\model output\nn_cfg.inc` 复制到 `DOSBox\` 目录（MASM.EXE / LINK.EXE 所在处）。
-
-MASM 没有 NASM 的 `incbin`，还需先把 `train\model output\net_weights.bin` 展开成权重数据文件 `NN_WDAT.INC`，放到 `NN.ASM` 旁边。在项目根目录运行：
-
-```python
-# make_wdat.py — net_weights.bin -> NN_WDAT.INC
-import os
-data = open(os.path.join("train", "model output", "net_weights.bin"), "rb").read()
-BLOCKS = [("w1", 6 * 27), ("w2", 16 * 152), ("w3", 10 * 258)]  # C1 162B / C3 2432B / F5 2580B
-with open("NN_WDAT.INC", "w") as f:
-    off = 0
-    for name, size in BLOCKS:
-        blk = data[off:off + size]; off += size; first = True
-        for i in range(0, size, 16):
-            row = ",".join("0%02Xh" % (b & 0xFF) for b in blk[i:i + 16])
-            f.write(("%-7s DB      %s" % (name, row)) if first else ("        DB      %s" % row))
-            f.write("\n"); first = False
-```
-
-把生成的 `NN_WDAT.INC` 也复制到 `DOSBox\` 目录，启动 DOSBox：
+MASM 没有 NASM 的 `incbin`，无法直接读二进制权重——第 1 步训练时已把同一份权重展开成 DB 数据写到 `asm\NN_WDAT.INC`。把它和 `asm\NN.ASM`、`train\model output\nn_cfg.inc` 一起复制到 `DOSBox\` 目录（MASM.EXE / LINK.EXE 所在处），启动 DOSBox：
 
 ```
 mount c c:\users\administrator\desktop\8086\dosbox

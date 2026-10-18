@@ -27,11 +27,12 @@ float32 CNN 训练 (NumPy 手写反向传播)
   │  测每层累加器实际值域 → 估 SH → ±1 网格 → 探针评估 → 20k 精评
   ▼
 导出产物
-  ├── asm/net_weights.bin   5174 B 量化权重 (incbin 嵌入汇编)
-  ├── asm/nn_cfg.inc        SH1/SH3/SH4 三行 equ
-  ├── asm/test_images.bin   200×98 B 参考测试图
-  ├── asm/test_labels.bin   200 B 参考标签
-  └── emu/DEMO0.TXT / DEMO9.TXT  回归演示输入
+  ├── train/model output/net_weights.bin   5174 B 量化权重 (NASM incbin 嵌入汇编)
+  ├── asm/NN_WDAT.INC                      同一字节的 DB 文本形式 (MASM INCLUDE 用)
+  ├── train/model output/nn_cfg.inc        SH1/SH3/SH4 三行 equ
+  ├── train/model output/test_images.bin   200×98 B 参考测试图
+  ├── train/model output/test_labels.bin   200 B 参考标签
+  └── train/test demo/DEMO0.TXT / DEMO9.TXT  回归演示输入
 ```
 
 **核心原则（本文最重要的一句话）**：训练脚本里必须有一个**逐位模拟 8086 整数行为**的
@@ -432,6 +433,11 @@ w1:     incbin  "net_weights.bin",0,C1LEN
 w2:     incbin  "net_weights.bin",C1LEN,C3LEN
 w3:     incbin  "net_weights.bin",C1LEN+C3LEN,F5LEN
 ```
+
+MASM 版（`asm/NN.ASM`）没有 `incbin`，改用 `INCLUDE NN_WDAT.INC`：训练脚本把
+**同一段字节流**逐字节展开成 `w1/w2/w3` 三个 DB 数据块（每行 16 字节，块末行按
+块边界截断）写到 `asm/NN_WDAT.INC`，与 net_weights.bin 内容完全一致——
+两种表示，一份权重，训练导出时同时生成。
 
 tap 顺序再强调一遍：**C1** **`(dr,dc)`；C3** **`(ci,dr,dc)`；F5** **`(ci,r,c)`** **通道优先**——
 与 2.2 的 im2col 循环顺序严格一致。
