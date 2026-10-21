@@ -407,7 +407,14 @@ def main():
     best = None
     for key in ranked[:3]:
         pred, (_, _, mx3) = cnn_forward_int(xte, qp, *key, collect=True)
-        assert mx3 >> key[2] <= 32767, f"{key}: output exceeds int16"
+        s1, s3, s4 = key
+        need = 0 if mx3 <= 32767 else int(np.ceil(np.log2(mx3 / 32767.0)))
+        if s4 < need:                   # probe-based est can undershoot on full test
+            print(f"SH1,SH3,SH4={key}: SH4 raised {s4} -> {need} (full-test int16 bound)")
+            s4 = need
+            key = (s1, s3, s4)
+            pred = cnn_forward_int(xte, qp, *key)
+        assert mx3 >> s4 <= 32767, f"{key}: output exceeds int16"
         acc = float((pred == yte).mean())
         print(f"SH1,SH3,SH4={key}: quant test acc {acc:.4f}")
         if best is None or acc > best[1]:
