@@ -432,7 +432,7 @@ I_C1Z:  inc     di
 I_C1C2: test    dx,dx
         jns     I_C1ST
         xor     dx,dx
-I_C1ST: mov     [bp],dl
+I_C1ST: mov     ds:[bp],dl      ; [bp] defaults to SS: force DS (h1 lives in DSEG)
         inc     bp
         inc     c1base
         dec     c1c
@@ -519,7 +519,7 @@ I_C3CI: push    cx
         mov     cx,5            ; dr 0..4
 I_C3DR: push    cx
         mov     cx,5            ; dc 0..4
-I_C3DC: mov     al,[bp]         ; w2 tap
+I_C3DC: mov     al,ds:[bp]      ; w2 tap (BP defaults to SS: force DS)
         inc     bp
         mov     ah,[si]         ; h2 value (0..127)
         inc     si

@@ -393,7 +393,8 @@ def main():
             # F5 acc range depends on SH1+SH3 -> estimate SH4 per pair
             _, (_, _, mx3) = cnn_forward_int(xprobe, qp, s1, s3, 1, collect=True)
             sh4_est = max(0, int(np.ceil(np.log2(max(mx3, 1) / 32767.0))))
-            for s4 in sorted({max(0, sh4_est + d) for d in (-1, 0, 1)}):
+            # no est-1: asm F5 argmax compares 16-bit, SH4 must keep |out| <= 32767
+            for s4 in (sh4_est, sh4_est + 1):
                 plan[(s1, s3, s4)] = None
     results = {}
     for key in plan:
@@ -405,7 +406,8 @@ def main():
     print("== fine evaluation on full 20k test ==")
     best = None
     for key in ranked[:3]:
-        pred = cnn_forward_int(xte, qp, *key)
+        pred, (_, _, mx3) = cnn_forward_int(xte, qp, *key, collect=True)
+        assert mx3 >> key[2] <= 32767, f"{key}: output exceeds int16"
         acc = float((pred == yte).mean())
         print(f"SH1,SH3,SH4={key}: quant test acc {acc:.4f}")
         if best is None or acc > best[1]:
